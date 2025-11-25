@@ -97,11 +97,17 @@
             border-radius: 5px;
             margin-bottom: 5px;
         }
+        #weather {
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #333;
+        }
     </style>
 </head>
 <body>
 
     <h1>Recipe Finder with Ingredient Map - Manolo Fortich, Bukidnon</h1>
+    <div id="weather">Loading weather...</div>
     <p>Click on a recipe below or search for one to view ingredients on the right. Click an ingredient to see its locations on the map.</p>
 
     <div id="recipeList"></div>
@@ -123,153 +129,195 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-    let images = {};
+        /* WEATHER API — safer with retry and periodic updates */
+        const API_KEY = "a1b9951b7ddca3545a7819dbed192895";  // Your valid API key
+        const lat = 8.3667, lon = 124.8667;
+        const weatherBox = document.getElementById("weather");
 
-    // Load images.json (assuming it's available)
-    fetch("images.json")
-        .then(response => response.json())
-        .then(data => {
-            images = data;
-        })
-        .catch(err => console.error("Failed to load images.json:", err));
-
-    // Map layers
-    const terrainLayer = L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 
-        {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
+        function loadWeather(retry = 0) {
+            weatherBox.innerHTML = "⏳ Updating weather...";
+            fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`)
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data.main || !data.weather) throw new Error("Invalid data structure");
+                    weatherBox.innerHTML = `
+                        <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}.png">
+                        <b>${data.main.temp}°C</b> – ${data.weather[0].description}
+                    `;
+                })
+                .catch(error => {
+                    if (retry < 3) {
+                        return setTimeout(() => loadWeather(retry + 1), 1500);
+                    }
+                    // Mock fallback for testing
+                    weatherBox.innerHTML = `
+                        <img src="https://openweathermap.org/img/wn/01d.png">
+                        <b>25°C</b> – Clear sky (Mock Data)
+                    `;
+                });
         }
-    );
+        loadWeather();  // Load weather on page load
 
-    const satelliteLayer = L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
-        {
-            maxZoom: 19,
-            attribution: 'Tiles © Esri'
-        }
-    );
+        // Update weather every 5 minutes (600,000 ms)
+        setInterval(loadWeather, 300000)
 
-    const map = L.map('map', {
-        center: [8.3667, 124.8667],
-        zoom: 13,
-        layers: [terrainLayer]   
-    });
+        let images = {};
 
-    const baseMaps = {
-        "Terrain Map": terrainLayer,
-        "Satellite Map": satelliteLayer
-    };
+        // Load images.json (assuming it's available)
+        fetch("images.json")
+            .then(response => response.json())
+            .then(data => {
+                images = data;
+            })
+            .catch(err => console.error("Failed to load images.json:", err));
 
-    L.control.layers(baseMaps).addTo(map);
+        // Map layers
+        const terrainLayer = L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 
+            {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }
+        );
 
-    let markers = [];
+        const satelliteLayer = L.tileLayer(
+            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
+            {
+                maxZoom: 19,
+                attribution: 'Tiles © Esri'
+            }
+        );
 
-    const mockRecipes = {
-        "chicken curry": {
-            title: "Chicken Curry",
-            ingredients: [
-                { name: "Chicken", price: 250, locations: [
-                    { lat: 8.3672, lng: 124.8672, store: "Prince Hypermart", price: 250, imageKey: "prince" }, 
-                    { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 240, imageKey: "grocery" }
-                ]},
-                { name: "Curry Powder", price: 50, locations: [
-                    { lat: 8.3656, lng: 124.8700, store: "Bukidnon Supermart", price: 50, imageKey: "supermart" },  
-                    { lat: 8.3656, lng: 124.8750, store: "Farmers' Coop", price: 55, imageKey: "coop" }
-                ]},
-                { name: "Onion", price: 30, locations: [
-                    { lat: 8.365575363390583, lng: 124.86521825090732, store: "Public Market", price: 30, imageKey: "public_market" },   
-                    { lat: 8.367142520246292, lng: 124.86719000984846, store: "Local Vendor", price: 35, imageKey: "vendor" }
-                ]}
-            ]
-        },
-        "pasta": {
-            title: "Pasta",
-            ingredients: [
-                { name: "Pasta", price: 80, locations: [
-                    { lat: 8.3667, lng: 124.8667, store: "Manolo Fortich Public Market", price: 80, imageKey: "market" },
-                    { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 75, imageKey: "grocery" }
-                ]},
-                { name: "Tomato Sauce", price: 60, locations: [
-                    { lat: 8.3650, lng: 124.8650, store: "Bukidnon Supermart", price: 60, imageKey: "supermart" },
-                    { lat: 8.3750, lng: 124.8750, store: "Farmers' Coop", price: 65, imageKey: "coop" }
-                ]}
-            ]
-        }
-    };
-
-   
-    const recipeListDiv = document.getElementById('recipeList');
-    Object.keys(mockRecipes).forEach(key => {
-        const button = document.createElement('button');
-        button.textContent = mockRecipes[key].title;
-        button.onclick = () => searchRecipe(key);
-        recipeListDiv.appendChild(button);
-    });
-
-    function searchRecipe(recipeKey = null) {
-        let query;
-        if (recipeKey) {
-            query = recipeKey;
-        } else {
-            query = document.getElementById('recipeInput').value.toLowerCase().trim();
-        }
-
-        if (!query) {
-            alert("Please enter a recipe name or click on a recipe.");
-            return;
-        }
-
-        const recipe = mockRecipes[query];
-        if (!recipe) {
-            alert("Recipe not found. Try 'Chicken Curry' or 'Pasta'.");
-            return;
-        }
-
-        
-        markers.forEach(marker => map.removeLayer(marker));
-        markers = [];
-
-        
-        document.getElementById('recipeTitle').textContent = recipe.title;
-        const ingredientsList = document.getElementById('ingredientsList');
-        ingredientsList.innerHTML = '';
-
-        recipe.ingredients.forEach(ing => {
-            const li = document.createElement('li');
-            li.textContent = `${ing.name} - Approx. ₱${ing.price}`;
-            li.onclick = () => showIngredientLocations(ing);
-            ingredientsList.appendChild(li);
+        const map = L.map('map', {
+            center: [8.3667, 124.8667],
+            zoom: 13,
+            layers: [terrainLayer]   
         });
 
-        document.getElementById('ingredientsSection').style.display = 'block';
-    }
+        const baseMaps = {
+            "Terrain Map": terrainLayer,
+            "Satellite Map": satelliteLayer
+        };
 
-    function showIngredientLocations(ingredient) {
-        
-        markers.forEach(marker => map.removeLayer(marker));
-        markers = [];
+        L.control.layers(baseMaps).addTo(map);
 
-       
-        ingredient.locations.forEach(loc => {
-            const imgUrl = images[loc.imageKey] || "https://via.placeholder.com/100x75?text=No+Image";
-            const popup = `
-                <img src="${imgUrl}" class="popup-image">
-                <b>${loc.store}</b><br>
-                ${ingredient.name}: ₱${loc.price}
-            `;
-            const marker = L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(popup);
-            markers.push(marker);
+        let markers = [];
+
+        const mockRecipes = {
+            "chicken curry": {
+                title: "Chicken Curry",
+                ingredients: [
+                    { name: "Chicken", price: 250, locations: [
+                        { lat: 8.3672, lng: 124.8672, store: "Prince Hypermart", price: 250, imageKey: "prince" }, 
+                        { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 240, imageKey: "grocery" },
+                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 245, imageKey: "central_market" }  // Shared location
+                    ]},
+                    { name: "Curry Powder", price: 50, locations: [
+                        { lat: 8.3656, lng: 124.8700, store: "Bukidnon Supermart", price: 50, imageKey: "supermart" },  
+                        { lat: 8.3656, lng: 124.8750, store: "Farmers' Coop", price: 55, imageKey: "coop" },
+                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 52, imageKey: "central_market" }  // Shared location
+                    ]},
+                    { name: "Onion", price: 30, locations: [
+                        { lat: 8.365575363390583, lng: 124.86521825090732, store: "Public Market", price: 30, imageKey: "public_market" },   
+                        { lat: 8.367142520246292, lng: 124.86719000984846, store: "Local Vendor", price: 35, imageKey: "vendor" },
+                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 32, imageKey: "central_market" }  // Shared location
+                    ]}
+                ]
+            },
+            "pasta": {
+                title: "Pasta",
+                ingredients: [
+                    { name: "Pasta", price: 80, locations: [
+                        { lat: 8.3667, lng: 124.8667, store: "Manolo Fortich Public Market", price: 80, imageKey: "market" },
+                        { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 75, imageKey: "grocery" },
+                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 78, imageKey: "central_market" }  // Shared location
+                    ]},
+                    { name: "Tomato Sauce", price: 60, locations: [
+                        { lat: 8.3650, lng: 124.8650, store: "Bukidnon Supermart", price: 60, imageKey: "supermart" },
+                        { lat: 8.3750, lng: 124.8750, store: "Farmers' Coop", price: 65, imageKey: "coop" },
+                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 62, imageKey: "central_market" }  // Shared location
+                    ]}
+                ]
+            }
+        };
+
+    
+        const recipeListDiv = document.getElementById('recipeList');
+        Object.keys(mockRecipes).forEach(key => {
+            const button = document.createElement('button');
+            button.textContent = mockRecipes[key].title;
+            button.onclick = () => searchRecipe(key);
+            recipeListDiv.appendChild(button);
         });
 
-        
-        if (markers.length > 0) {
-            const group = new L.featureGroup(markers);
-            map.fitBounds(group.getBounds());
+        function searchRecipe(recipeKey = null) {
+            let query;
+            if (recipeKey) {
+                query = recipeKey;
+            } else {
+                query = document.getElementById('recipeInput').value.toLowerCase().trim();
+            }
+
+            if (!query) {
+                alert("Please enter a recipe name or click on a recipe.");
+                return;
+            }
+
+            const recipe = mockRecipes[query];
+            if (!recipe) {
+                alert("Recipe not found. Try 'Chicken Curry' or 'Pasta'.");
+                return;
+            }
+
+            
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+            
+            document.getElementById('recipeTitle').textContent = recipe.title;
+            const ingredientsList = document.getElementById('ingredientsList');
+            ingredientsList.innerHTML = '';
+
+            recipe.ingredients.forEach(ing => {
+                const li = document.createElement('li');
+                li.textContent = `${ing.name} - Approx. ₱${ing.price}`;
+                li.onclick = () => showIngredientLocations(ing);
+                ingredientsList.appendChild(li);
+            });
+
+            document.getElementById('ingredientsSection').style.display = 'block';
         }
-    }
+
+        function showIngredientLocations(ingredient) {
+            
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+        
+            ingredient.locations.forEach(loc => {
+                const imgUrl = images[loc.imageKey] || "https://via.placeholder.com/100x75?text=No+Image";
+                const popup = `
+                    <img src="${imgUrl}" class="popup-image">
+                    <b>${loc.store}</b><br>
+                    ${ingredient.name}: ₱${loc.price}
+                `;
+                const marker = L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(popup);
+                markers.push(marker);
+            });
+
+            
+            if (markers.length > 0) {
+                const group = new L.featureGroup(markers);
+                map.fitBounds(group.getBounds());
+            }
+        }
+
+        // Load default recipe on page load
+        searchRecipe("chicken curry");
     </script>
 
 </body>
 </html>
-dasda
