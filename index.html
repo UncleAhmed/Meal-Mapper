@@ -115,7 +115,7 @@
 
     <div class="header">
         <h1>Meal Mapper - Manolo Fortich, Bukidnon</h1>
-        <button onclick="window.location.href='about.html'">About Us</button>
+        <button onclick="window.location.href='aboutUs.html'">About Us</button>
     </div>
     <div id="weather">Loading weather...</div>
     <p>Click on a recipe below or search for one to view ingredients on the right. Click an ingredient to see its locations on the map.</p>
@@ -169,14 +169,13 @@
                     `;
                 });
         }
-        loadWeather();  // Load weather on page load
+        loadWeather();  
 
-        // Update weather every 5 minutes (600,000 ms)
         setInterval(loadWeather, 300000)
 
         let images = {};
 
-        // Load images.json (assuming it's available)
+      
         fetch("images.json")
             .then(response => response.json())
             .then(data => {
@@ -215,6 +214,14 @@
         L.control.layers(baseMaps).addTo(map);
 
         let markers = [];
+
+       
+        const customIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/8670/8670612.png',  
+            iconSize: [35, 35],  
+            iconAnchor: [12, 12],  
+            popupAnchor: [0, -12]  
+        });
 
         const mockRecipes = {
             "chicken curry": {
@@ -314,7 +321,7 @@
                     <b>${loc.store}</b><br>
                     ${ingredient.name}: ₱${loc.price}
                 `;
-                const marker = L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(popup);
+                const marker = L.marker([loc.lat, loc.lng], {icon: customIcon}).addTo(map).bindPopup(popup);
                 markers.push(marker);
             });
 
