@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Finder with Ingredient Map - Manolo Fortich, Bukidnon</title>
+    <title>Meal Mapper - Manolo Fortich, Bukidnon</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body {
@@ -12,8 +12,15 @@
             text-align: center;
             padding: 20px;
         }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
         h1 {
             color: #333;
+            margin: 0;
         }
         .container {
             margin-top: 20px;
@@ -59,7 +66,7 @@
             margin-top: 20px;
         }
         #map {
-            height: 400px;
+            height: 500px;
             width: 50%;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -106,7 +113,10 @@
 </head>
 <body>
 
-    <h1>Recipe Finder with Ingredient Map - Manolo Fortich, Bukidnon</h1>
+    <div class="header">
+        <h1>Meal Mapper - Manolo Fortich, Bukidnon</h1>
+        <button onclick="window.location.href='about.html'">About Us</button>
+    </div>
     <div id="weather">Loading weather...</div>
     <p>Click on a recipe below or search for one to view ingredients on the right. Click an ingredient to see its locations on the map.</p>
 
@@ -213,17 +223,17 @@
                     { name: "Chicken", price: 250, locations: [
                         { lat: 8.3672, lng: 124.8672, store: "Prince Hypermart", price: 250, imageKey: "prince" }, 
                         { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 240, imageKey: "grocery" },
-                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 245, imageKey: "central_market" }  // Shared location
+                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 245, imageKey: "central_market" }  
                     ]},
                     { name: "Curry Powder", price: 50, locations: [
                         { lat: 8.3656, lng: 124.8700, store: "Bukidnon Supermart", price: 50, imageKey: "supermart" },  
                         { lat: 8.3656, lng: 124.8750, store: "Farmers' Coop", price: 55, imageKey: "coop" },
-                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 52, imageKey: "central_market" }  // Shared location
+                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 52, imageKey: "central_market" }  
                     ]},
                     { name: "Onion", price: 30, locations: [
                         { lat: 8.365575363390583, lng: 124.86521825090732, store: "Public Market", price: 30, imageKey: "public_market" },   
                         { lat: 8.367142520246292, lng: 124.86719000984846, store: "Local Vendor", price: 35, imageKey: "vendor" },
-                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 32, imageKey: "central_market" }  // Shared location
+                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 32, imageKey: "central_market" }  
                     ]}
                 ]
             },
@@ -233,12 +243,12 @@
                     { name: "Pasta", price: 80, locations: [
                         { lat: 8.3667, lng: 124.8667, store: "Manolo Fortich Public Market", price: 80, imageKey: "market" },
                         { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 75, imageKey: "grocery" },
-                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 78, imageKey: "central_market" }  // Shared location
+                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 78, imageKey: "central_market" }  
                     ]},
                     { name: "Tomato Sauce", price: 60, locations: [
                         { lat: 8.3650, lng: 124.8650, store: "Bukidnon Supermart", price: 60, imageKey: "supermart" },
                         { lat: 8.3750, lng: 124.8750, store: "Farmers' Coop", price: 65, imageKey: "coop" },
-                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 62, imageKey: "central_market" }  // Shared location
+                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 62, imageKey: "central_market" }  
                     ]}
                 ]
             }
@@ -315,7 +325,6 @@
             }
         }
 
-        // Load default recipe on page load
         searchRecipe("chicken curry");
     </script>
 
