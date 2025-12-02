@@ -120,7 +120,6 @@
     <div id="weather">Loading weather...</div>
     <p>Click on a recipe below or search for one to view ingredients on the right. Click an ingredient to see its locations on the map.</p>
 
-    <div id="recipeList"></div>
 
     <div class="container">
         <input id="recipeInput" type="text" placeholder="Enter a recipe (e.g., Chicken Curry)">
@@ -139,8 +138,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        /* WEATHER API — safer with retry and periodic updates */
-        const API_KEY = "a1b9951b7ddca3545a7819dbed192895";  // Your valid API key
+      
+        const API_KEY = "a1b9951b7ddca3545a7819dbed192895";  //  valid API key
         const lat = 8.3667, lon = 124.8667;
         const weatherBox = document.getElementById("weather");
 
@@ -289,15 +288,61 @@
                         {lat:8.3656, lng:124.8651, store:"Central Market", price:25, imageKey:"central_market"}  // Shared location
                     ]}
                 ]
-            }
+                    },
+    "humba": {
+    title: "Humba",
+    ingredients: [
+        { name: "Pork Belly", price: 280, locations: [
+            { lat: 8.3672, lng: 124.8672, store: "Prince Hypermart", price: 280, imageKey: "prince" },
+            { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 270, imageKey: "grocery" },
+            { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 275, imageKey: "central_market" }
+        ]},
 
+        { name: "Soy Sauce", price: 20, locations: [
+            { lat: 8.3656, lng: 124.8700, store: "Bukidnon Supermart", price: 20, imageKey: "supermart" },
+            { lat: 8.3656, lng: 124.8750, store: "Prince Hypermart  ", price: 22, imageKey: "coop" },
+            { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 21, imageKey: "central_market" }
+        ]},
 
+        { name: "Vinegar", price: 15, locations: [
+            { lat: 8.365575363390583, lng: 124.86521825090732, store: "Public Market", price: 15, imageKey: "public_market" },
+            { lat: 8.367142520246292, lng: 124.86719000984846, store: "Local Vendor", price: 18, imageKey: "vendor" },
+            { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 17, imageKey: "central_market" }
+        ]},
 
+        { name: "Banana Blossoms", price: 25, locations: [
+            { lat: 8.365575363390583, lng: 124.86521825090732, store: "Public Market", price: 25, imageKey: "public_market" },
+            { lat: 8.367142520246292, lng: 124.86719000984846, store: "Local Vendor", price: 28, imageKey: "vendor" },
+            { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 26, imageKey: "central_market" }
+        ]},
 
+        { name: "Tausi (Black Beans)", price: 20, locations: [
+            { lat: 8.3656, lng: 124.8700, store: "Bukidnon Supermart", price: 20, imageKey: "supermart" },
+            { lat: 8.3656, lng: 124.8750, store: "Farmers' Coop", price: 23, imageKey: "coop" },
+            { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 22, imageKey: "central_market" }
+        ]},
 
-        };
+        { name: "Brown Sugar", price: 18, locations: [
+            { lat: 8.365575363390583, lng: 124.86521825090732, store: "Public Market", price: 18, imageKey: "public_market" },
+            { lat: 8.367142520246292, lng: 124.86719000984846, store: "Local Vendor", price: 20, imageKey: "vendor" },
+            { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 19, imageKey: "central_market" }
+        ]},
 
-    
+        { name: "Star Anise", price: 10, locations: [
+            { lat: 8.3656, lng: 124.8700, store: "Bukidnon Supermart", price: 10, imageKey: "supermart" },
+            { lat: 8.3656, lng: 124.8750, store: "Farmers' Coop", price: 12, imageKey: "coop" },
+            { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 11, imageKey: "central_market" }
+        ]},
+
+        { name: "Pineapple Juice", price: 28, locations: [
+            { lat: 8.3672, lng: 124.8672, store: "Prince Hypermart", price: 28, imageKey: "prince" },
+            { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 30, imageKey: "grocery" },
+            { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 29, imageKey: "central_market" }
+        ]}
+    ]
+    }
+};
+
         const recipeListDiv = document.getElementById('recipeList');
         Object.keys(mockRecipes).forEach(key => {
             const button = document.createElement('button');
