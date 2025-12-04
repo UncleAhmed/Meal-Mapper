@@ -124,7 +124,7 @@
     <div class="container">
         <input id="recipeInput" type="text" placeholder="Enter a recipe (e.g., Chicken Curry)">
         <button onclick="searchRecipe()">Search Recipe</button>
-    </div>
+
 
     <div id="content">
         <div id="map"></div>
@@ -139,7 +139,7 @@
 
     <script>
       
-        const API_KEY = "a1b9951b7ddca3545a7819dbed192895";  //  valid API key
+        const API_KEY = "a1b9951b7ddca3545a7819dbed192895";  
         const lat = 8.3667, lon = 124.8667;
         const weatherBox = document.getElementById("weather");
 
@@ -161,7 +161,7 @@
                     if (retry < 3) {
                         return setTimeout(() => loadWeather(retry + 1), 1500);
                     }
-                    // Mock fallback for testing
+                    
                     weatherBox.innerHTML = `
                         <img src="https://openweathermap.org/img/wn/01d.png">
                         <b>25°C</b> – Clear sky (Mock Data)
@@ -174,15 +174,32 @@
 
         let images = {};
 
-      
-        fetch("images.json")
-            .then(response => response.json())
-            .then(data => {
-                images = data;
-            })
-            .catch(err => console.error("Failed to load images.json:", err));
+        function normalizeKey(k) {
+            if (!k) return '';
+            return String(k).toLowerCase().trim().replace(/\s+/g, '_').replace(/[\/\\]/g, '_').replace(/[^\w\-]/g, '_');
+        }
 
-        // Map layers
+        function getImageUrl(key) {
+            if (!key) return '';
+            if (images[key]) return images[key];
+            const nk = normalizeKey(key);
+            return images[nk] || '';
+        }
+
+        fetch("index.json")
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                Object.keys(data).forEach(k => {
+                    images[k] = data[k];
+                    images[normalizeKey(k)] = data[k];
+                });
+            })
+            .catch(err => console.error("Failed to load index.json:", err));
+
+
         const terrainLayer = L.tileLayer(
             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 
             {
@@ -227,19 +244,19 @@
                 title: "Chicken Curry",
                 ingredients: [
                     { name: "Chicken", price: 250, locations: [
-                        { lat: 8.3672, lng: 124.8672, store: "Prince Hypermart", price: 250, imageKey: "prince" }, 
-                        { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 240, imageKey: "grocery" },
-                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 245, imageKey: "central_market" }  
+                        { lat: 8.3672, lng: 124.8672, store: "Prince Hypermart", price: 250, imageKey: "Prince Hypermart" }, 
+                        { lat: 8.365349546725271, lng: 124.86514988080557, store: "Chick Inn", price: 240, imageKey: "Chick Inn" },
+                        { lat: 8.366643176935309, lng: 124.86381749147706, store: "Aj's Chicken Station", price: 245, imageKey: "Aj's Chicken Station" }
                     ]},
                     { name: "Curry Powder", price: 50, locations: [
-                        { lat: 8.3656, lng: 124.8700, store: "Bukidnon Supermart", price: 50, imageKey: "supermart" },  
-                        { lat: 8.3656, lng: 124.8750, store: "Farmers' Coop", price: 55, imageKey: "coop" },
-                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 52, imageKey: "central_market" }  
+                        { lat: 8.3672, lng: 124.8672, store: "Prince Hypermart", price: 50, imageKey: "Prince Hypermart" },  
+                        { lat: 8.368036316822822, lng: 124.86738480853599, store: "Ck Mart", price: 55, imageKey: "Ck Mart" },
+                        { lat: 8.365606756516602, lng: 124.86520285192277, store: "Manolo Fortich Public Market", price: 52, imageKey: "Public Market" },
+                        { lat: 8.366676076358782, lng: 124.8647116150032, store: "Local Vendor", price: 35, imageKey: "Local Vendor" }
                     ]},
                     { name: "Onion", price: 30, locations: [
-                        { lat: 8.365575363390583, lng: 124.86521825090732, store: "Public Market", price: 30, imageKey: "public_market" },   
-                        { lat: 8.367142520246292, lng: 124.86719000984846, store: "Local Vendor", price: 35, imageKey: "vendor" },
-                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 32, imageKey: "central_market" }  
+                        { lat: 8.365575363390583, lng: 124.86521825090732, store: "Manolo Fortich Public Market", price: 30, imageKey: "Public Market" },   
+                        { lat: 8.366676076358782, lng: 124.8647116150032, store: "Local Vendor", price: 35, imageKey: "Local Vendor" }
                     ]}
                 ]
             },
@@ -247,14 +264,14 @@
                 title: "Pasta",
                 ingredients: [
                     { name: "Pasta", price: 80, locations: [
-                        { lat: 8.3667, lng: 124.8667, store: "Manolo Fortich Public Market", price: 80, imageKey: "market" },
-                        { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 75, imageKey: "grocery" },
-                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 78, imageKey: "central_market" }  
+                        { lat: 8.3657, lng: 124.8651, store: "Manolo Fortich Public Market", price: 80, imageKey: "Public Market" },
+                        { lat: 8.366676076358782, lng: 124.8647116150032, store: "Local Vendor", price: 35, imageKey: "Local Vendor" },
+                           { lat: 8.3672, lng: 124.8672, store: "Prince Hypermart", price: 78, imageKey: "Prince Hypermart" } 
                     ]},
                     { name: "Tomato Sauce", price: 60, locations: [
-                        { lat: 8.3650, lng: 124.8650, store: "Bukidnon Supermart", price: 60, imageKey: "supermart" },
-                        { lat: 8.3750, lng: 124.8750, store: "Farmers' Coop", price: 65, imageKey: "coop" },
-                        { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 62, imageKey: "central_market" }  
+                         { lat: 8.3657, lng: 124.8651, store: "Manolo Fortich Public Market", price: 60, imageKey: "Public Market" },,
+                          { lat: 8.366676076358782, lng: 124.8647116150032, store: "Local Vendor", price: 65, imageKey: "Local Vendor" },
+                        { lat: 8.36755194100574, lng: 124.86514572750262, store: "7/11", price: 62, imageKey: "7/11" } 
                     ]}
                 ]
             },
@@ -263,29 +280,29 @@
                 title: "Fruit Salad",
                 ingredients:[
                     {name: "Mango", price: 100, locations:[
-                        {lat:8.36736, lng:124.86700, store:"Prince Hypermart Fruit Stand", price:95, imageKey:"prince"},
+                        {lat:8.36736, lng:124.86700, store:"Prince Hypermart Fruit Stand", price:95, imageKey:"Prince Hypermart"},
                         {lat:8.36628, lng:124.86557, store:"Local Fruit Stand", price:75, imageKey:"fruit_stand"},
-                        {lat:8.3656, lng:124.8651, store:"Central Market", price:80, imageKey:"central_market"}  // Shared location
+                        {lat:8.3656, lng:124.8651, store:"Central Market", price:80, imageKey:"central_market"}  
                     ]},
                     {name: "Pineapple", price: 80, locations:[
-                         {lat:8.36736, lng:124.86700, store:"Prince Hypermart Fruit Stand", price:65, imageKey:"prince"},
+                         {lat:8.36736, lng:124.86700, store:"Prince Hypermart Fruit Stand", price:65, imageKey:"Prince Hypermart"},
                         {lat:8.36628, lng:124.86557, store:"Local Fruit Stand", price:55, imageKey:"fruit_stand"},
-                        {lat:8.3656, lng:124.8651, store:"Central Market", price:50, imageKey:"central_market"}  // Shared location
+                        {lat:8.3656, lng:124.8651, store:"Central Market", price:50, imageKey:"central_market"} 
                     ]},
                     {name: "Apple", price: 50, locations:[
                          {lat:8.36736, lng:124.86700, store:"Prince Hypermart Fruit Stand", price:10, imageKey:"prince"},
                         {lat:8.36628, lng:124.86557, store:"Local Fruit Stand", price:11, imageKey:"fruit_stand"},
-                        {lat:8.3656, lng:124.8651, store:"Central Market", price:15, imageKey:"central_market"}  // Shared location
+                        {lat:8.3656, lng:124.8651, store:"Central Market", price:15, imageKey:"central_market"} 
                     ]},
                      {name: "Mayonnaise", price: 50, locations:[
                         {lat:8.36732, lng:124.86708, store:"Prince Hypermart", price:35, imageKey:"prince"},
                         {lat:8.36755, lng:124.86514, store:"7/11", price:55, imageKey:"fruit_stand"},
-                        {lat:8.3656, lng:124.8651, store:"Central Market", price:35, imageKey:"central_market"}  // Shared location
+                        {lat:8.3656, lng:124.8651, store:"Central Market", price:35, imageKey:"central_market"}
                     ]}, 
                     {name: "Banana", price: 50, locations:[
                         {lat:8.36736, lng:124.86700, store:"Prince Hypermart Fruit Stand", price:30, imageKey:"prince"},
                         {lat:8.36628, lng:124.86557, store:"Local Fruit Stand", price:35, imageKey:"fruit_stand"},
-                        {lat:8.3656, lng:124.8651, store:"Central Market", price:25, imageKey:"central_market"}  // Shared location
+                        {lat:8.3656, lng:124.8651, store:"Central Market", price:25, imageKey:"central_market"}
                     ]}
                 ]
                     },
@@ -294,12 +311,12 @@
     ingredients: [
         { name: "Pork Belly", price: 280, locations: [
             { lat: 8.3672, lng: 124.8672, store: "Prince Hypermart", price: 280, imageKey: "prince" },
-            { lat: 8.3700, lng: 124.8700, store: "Local Grocery Store", price: 270, imageKey: "grocery" },
-            { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 275, imageKey: "central_market" }
+            { lat: 8.3654, lng: 124.8651, store: "Local Meat Shop", price: 270, imageKey: "grocery" },
+            { lat: 8.3679, lng: 124.8672, store: "Alexa's Meatshop", price: 275, imageKey: "central_market" }
         ]},
 
         { name: "Soy Sauce", price: 20, locations: [
-            { lat: 8.3656, lng: 124.8700, store: "Bukidnon Supermart", price: 20, imageKey: "supermart" },
+            { lat: 8.368036316822822, lng: 124.86738480853599, store: "Ck Mart", price: 20, imageKey: "supermart" },
             { lat: 8.3656, lng: 124.8750, store: "Prince Hypermart  ", price: 22, imageKey: "coop" },
             { lat: 8.3660, lng: 124.8660, store: "Central Market", price: 21, imageKey: "central_market" }
         ]},
@@ -386,7 +403,8 @@
                 ingredientsList.appendChild(li);
             });
 
-            document.getElementById('ingredientsSection').style.display = 'block';
+            document.getElementById('ingredientsSection').style.display = 'block'; 
+            
         }
 
         function showIngredientLocations(ingredient) {
@@ -396,15 +414,20 @@
 
         
             ingredient.locations.forEach(loc => {
-                const imgUrl = images[loc.imageKey] || "https://via.placeholder.com/100x75?text=No+Image";
+                const imgUrl = getImageUrl(loc.imageKey);
+                const imgHtml = imgUrl
+                    ? `<a href="${imgUrl}" target="_blank" rel="noopener noreferrer">
+                           <img class="popup-image" src="${imgUrl}" alt="${loc.store}" />
+                       </a>`
+                    : '';
                 const popup = `
-                    <img src="${imgUrl}" class="popup-image">
+                    ${imgHtml}<br>
                     <b>${loc.store}</b><br>
                     ${ingredient.name}: ₱${loc.price}
                 `;
-                const marker = L.marker([loc.lat, loc.lng], {icon: customIcon}).addTo(map).bindPopup(popup);
-                markers.push(marker);
-            });
+                 const marker = L.marker([loc.lat, loc.lng], {icon: customIcon}).addTo(map).bindPopup(popup);
+                 markers.push(marker);
+             });
 
             
             if (markers.length > 0) {
